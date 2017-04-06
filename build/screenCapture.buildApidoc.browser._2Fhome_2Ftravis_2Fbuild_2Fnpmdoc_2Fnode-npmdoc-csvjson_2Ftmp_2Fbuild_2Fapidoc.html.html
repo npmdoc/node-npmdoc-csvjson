@@ -1,0 +1,486 @@
+<html><head></head><body><div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a href="https://github.com/pradeep-mishra/csvjson#readme">csvjson (v4.1.3)</a>
+</h1>
+<h4>convert csv to json and json to csv</h4>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.csvjson">module csvjson</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.csvjson.toArray">
+            function <span class="apidocSignatureSpan">csvjson.</span>toArray
+            <span class="apidocSignatureSpan">(data, opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.csvjson.toCSV">
+            function <span class="apidocSignatureSpan">csvjson.</span>toCSV
+            <span class="apidocSignatureSpan">(data, opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.csvjson.toColumnArray">
+            function <span class="apidocSignatureSpan">csvjson.</span>toColumnArray
+            <span class="apidocSignatureSpan">(data, opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.csvjson.toObject">
+            function <span class="apidocSignatureSpan">csvjson.</span>toObject
+            <span class="apidocSignatureSpan">(data, opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.csvjson.toSchemaObject">
+            function <span class="apidocSignatureSpan">csvjson.</span>toSchemaObject
+            <span class="apidocSignatureSpan">(data, opts)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.csvjson" id="apidoc.module.csvjson">module csvjson</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.csvjson.toArray" id="apidoc.element.csvjson.toArray">
+        function <span class="apidocSignatureSpan">csvjson.</span>toArray
+        <span class="apidocSignatureSpan">(data, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toArray(data, opts){
+
+    opts = opts || { };
+
+    var delimiter   = (opts.delimiter || ',');
+    var quote       = _getQuote(opts.quote);
+    var content     = data;
+
+    if(typeof(content) !== "string"){
+        throw new Error("Invalid input, input data should be a string");
+    }
+
+    content = content.split(/[\n\r]+/ig);
+    var arrayData = [ ];
+    content.forEach(function(item){
+        if(item){
+            item = quote ?
+                _convertArray(item, delimiter, quote) :
+                item.split(delimiter);
+
+            item = item.map(function(cItem){
+                return _trimQuote(cItem);
+            });
+            arrayData.push(item);
+        }
+    });
+    return arrayData;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+var options = {
+  delimiter : ',' // optional
+  quote     : '"' // optional
+};
+
+// for multiple delimiter you can use regex pattern like this /[,|;]+/
+
+csvjson.<span class="apidocCodeKeywordSpan">toArray</span>(data, options);
+
+/*
+returns
+[
+    ["sr","name","age","gender"],
+    ["1","rocky","33","male"],
+    ["2","jacky","22","male"],
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.csvjson.toCSV" id="apidoc.element.csvjson.toCSV">
+        function <span class="apidocSignatureSpan">csvjson.</span>toCSV
+        <span class="apidocSignatureSpan">(data, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toCSV(data, opts){
+
+    opts                = (opts || { });
+    opts.delimiter      = (opts.delimiter || ',');
+    opts.wrap           = (opts.wrap || '');
+    opts.arrayDenote    = (opts.arrayDenote &amp;&amp; String(opts.arrayDenote).trim() ? opts.arrayDenote : '[]');
+    opts.objectDenote   = (opts.objectDenote &amp;&amp; String(opts.objectDenote).trim() ? opts.objectDenote : '.');
+    opts.detailedOutput = (typeof(opts.detailedOutput) !== "boolean" ? true : opts.detailedOutput);
+    opts.headers        = String(opts.headers).toLowerCase();
+    var csvJSON         = { };
+    var csvData         = "";
+
+    if(!opts.headers.match(/none|full|relative|key/)){
+      opts.headers = 'full';
+    }else{
+      opts.headers = opts.headers.match(/none|full|relative|key/)[0];
+    }
+
+    if(opts.wrap === true){
+        opts.wrap = '"';
+    }
+
+    if(typeof(data) === "string"){
+        data = JSON.parse(data);
+    }
+
+    _toCsv(data, csvJSON, "", 0, opts);
+
+    var headers = _getHeaders(opts.headers, csvJSON, opts);
+
+    if(headers){
+      if(opts.wrap){
+        headers = headers.map(function(item){
+          return opts.wrap + item + opts.wrap;
+        });
+      }
+      csvData = headers.join(opts.delimiter);
+    }
+
+    var bigArrayLen = _getBigArrayLength(csvJSON);
+    var keys        = Object.keys(csvJSON);
+    var row         = [ ];
+
+    var replaceNewLinePattern = /\n|\r/g;
+    if(!opts.wrap){
+        replaceNewLinePattern = new RegExp('\n|\r|' + opts.delimiter, 'g');
+    }
+
+
+    for(var i = 0; i &lt; bigArrayLen; i++){
+        row = [ ];
+        for(var j = 0; j &lt; keys.length; j++){
+            if(csvJSON[keys[j]][i]){
+                csvJSON[keys[j]][i] = csvJSON[keys[j]][i].replace(replaceNewLinePattern, '\t');
+                if(opts.wrap){
+                    csvJSON[keys[j]][i] = opts.wrap + csvJSON[keys[j]][i] + opts.wrap;
+                }
+                row[row.length] = csvJSON[keys[j]][i];
+            }else{
+                row[row.length] = "";
+            }
+        }
+      csvData += '\n' + row.join(opts.delimiter);
+    }
+    return csvData;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+    wrap  = &lt;String|Boolean&gt; optional default value is false
+    headers = &lt;String&gt; optional supported values are "full", "none", "relative", "key
+"
+    objectDenote = &lt;String&gt; optional default value is "."
+    arrayDenote = &lt;String&gt; optional default value is "[]"
+*/
+
+
+csvjson.<span class="apidocCodeKeywordSpan">toCSV</span>(data, options);
+
+/*
+returns
+
+book.person[].firstName,book.person[].lastName,book.person[].age,book.person[].address.streetAddress,book.person[].address.city,
+book.person[].address.state,book.person[].address.postalCode,book.person[].hobbies[]
+Jane,Doe,25,21 2nd Street,Las Vegas,NV,10021-3100,gaming;volleyball
+Agatha,Doe,25,21 2nd Street,Las Vegas,NV,10021-3100,dancing;politics
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.csvjson.toColumnArray" id="apidoc.element.csvjson.toColumnArray">
+        function <span class="apidocSignatureSpan">csvjson.</span>toColumnArray
+        <span class="apidocSignatureSpan">(data, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toColumnArray(data, opts){
+
+    opts = opts || { };
+
+    var delimiter   = (opts.delimiter || ',');
+    var quote       = _getQuote(opts.quote);
+    var content     = data;
+    var headers     = null;
+
+    if(typeof(content) !== "string"){
+        throw new Error("Invalid input, input data should be a string");
+    }
+
+    content         = content.split(/[\n\r]+/ig);
+
+    if(typeof(opts.headers) === "string"){
+        headers = opts.headers.split(/[\n\r]+/ig);
+        headers = quote ?
+                _convertArray(headers.shift(), delimiter, quote) :
+                headers.shift().split(delimiter);
+    }else{
+        headers = quote ?
+                _convertArray(content.shift(), delimiter, quote) :
+                content.shift().split(delimiter);
+    }
+
+
+    var hashData    = { };
+
+    headers.forEach(function(item){
+        hashData[item] = [];
+    });
+
+    content.forEach(function(item){
+        if(item){
+            item = quote ?
+                  _convertArray(item, delimiter, quote) :
+                  item.split(delimiter);
+            item.forEach(function(val, index){
+                hashData[headers[index]].push(_trimQuote(val));
+            });
+        }
+    });
+
+    return hashData;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+/*
+  for importing headers from different source you can use headers property in options
+  var options = {
+headers : "sr,name,age,gender"
+  };
+*/
+
+csvjson.<span class="apidocCodeKeywordSpan">toColumnArray</span>(data, options);
+
+/*
+returns
+
+{
+    sr: [ '1', '2', '3' ],
+    name: [ 'rocky', 'jacky', 'suzy' ],
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.csvjson.toObject" id="apidoc.element.csvjson.toObject">
+        function <span class="apidocSignatureSpan">csvjson.</span>toObject
+        <span class="apidocSignatureSpan">(data, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toObject(data, opts){
+
+    opts = opts || { };
+
+    var delimiter   = (opts.delimiter || ',');
+    var quote       = _getQuote(opts.quote);
+    var content     = data;
+    var headers     = null;
+
+    if(typeof(content) !== "string"){
+        throw new Error("Invalid input, input data should be a string");
+    }
+
+    content = content.split(/[\n\r]+/ig);
+
+    if(typeof(opts.headers) === "string"){
+        headers = opts.headers.split(/[\n\r]+/ig);
+        headers = quote ?
+                _convertArray(headers.shift(), delimiter, quote) :
+                headers.shift().split(delimiter);
+    }else{
+        headers = quote ?
+                _convertArray(content.shift(), delimiter, quote) :
+                content.shift().split(delimiter);
+    }
+
+    var hashData = [ ];
+
+    content.forEach(function(item){
+        if(item){
+          item = quote ?
+                _convertArray(item, delimiter, quote) :
+                item.split(delimiter);
+            var hashItem = { };
+            headers.forEach(function(headerItem, index){
+                hashItem[headerItem] = _trimQuote(item[index]);
+            });
+            hashData.push(hashItem);
+        }
+    });
+    return hashData;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+/*
+  for importing headers from different source you can use headers property in options
+  var options = {
+headers : "sr,name,age,gender"
+  };
+*/
+
+csvjson.<span class="apidocCodeKeywordSpan">toObject</span>(data, options);
+
+/*
+returns
+
+[
+    {
+        sr : 1,
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.csvjson.toSchemaObject" id="apidoc.element.csvjson.toSchemaObject">
+        function <span class="apidocSignatureSpan">csvjson.</span>toSchemaObject
+        <span class="apidocSignatureSpan">(data, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toSchemaObject(data, opts){
+
+    opts = opts || { };
+
+    var delimiter   = (opts.delimiter || ',');
+    var quote       = _getQuote(opts.quote);
+    var content     = data;
+    var headers     = null;
+    if(typeof(content) !== "string"){
+        throw new Error("Invalid input, input should be a string");
+    }
+
+    content         = content.split(/[\n\r]+/ig);
+
+
+    if(typeof(opts.headers) === "string"){
+        headers = opts.headers.split(/[\n\r]+/ig);
+        headers = quote ?
+                _convertArray(headers.shift(), delimiter, quote) :
+                headers.shift().split(delimiter);
+    }else{
+        headers = quote ?
+                _convertArray(content.shift(), delimiter, quote) :
+                content.shift().split(delimiter);
+    }
+
+
+    var hashData    = [ ];
+
+    content.forEach(function(item){
+        if(item){
+          item = quote ?
+                _convertArray(item, delimiter, quote) :
+                item.split(delimiter);
+            var schemaObject = {};
+            item.forEach(function(val, index){
+                _putDataInSchema(headers[index], val, schemaObject , delimiter, quote);
+            });
+            hashData.push(schemaObject);
+        }
+    });
+
+    return hashData;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+/*
+  for importing headers from different source you can use headers property in options
+  var options = {
+headers : "created,contact.name,contact.age+,contact.number+,address[],address[],contact.hobbies[;],-id,friends[0].name,friends
+[0].phone,friends[1].name,friends[1].phone"
+  };
+*/
+
+csvjson.<span class="apidocCodeKeywordSpan">toSchemaObject</span>(data, options)
+
+/*
+returns
+
+[
+    {
+        "created":"2014-11-12",
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
+</body></html>
